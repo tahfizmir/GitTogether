@@ -1,9 +1,14 @@
 const express = require('express'); 
+const {authAdmin,authUser}=require("./middleware/auth");
 const app = express();
+
+app.use("/user",[authUser,(req,res)=>{
+    res.send('user authenticated');
+}])
+app.use("/admin",authAdmin,(req,res)=>{
+    res.status(200).send('admin authenticated');
+})
+
 app.listen(3000,()=>{
     console.log("server is listening at 3000");
-})
-app.use("",(req,res)=>{
-    
-    res.send(`${req} is the response`);
 })
