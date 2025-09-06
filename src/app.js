@@ -1,19 +1,14 @@
 const express = require('express'); 
-const {authAdmin,authUser}=require("./middleware/auth");
+const {authAdmin,authUser}=require('./middleware/auth');
+const connectDB=require('./config/database.js');
 const app = express();
 
-app.use("/user",[authUser,(req,res)=>{
-    res.send('user authenticated');
-}])
-app.use("/admin",authAdmin,(req,res)=>{
-    res.status(200).send('admin authenticated');
-})
-app.use("/",(err,req,res,next)=>{
-    if(err){
-        res.status(500).send('something went wrong')
-    }
-})
 
-app.listen(3000,()=>{
+connectDB().then(()=>{
+    console.log("database connected successfully");
+    app.listen(3000,()=>{
     console.log("server is listening at 3000");
+})
+}).catch((err)=>{
+    console.log("error in connecting database")
 })
