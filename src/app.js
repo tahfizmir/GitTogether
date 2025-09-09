@@ -68,7 +68,7 @@ app.patch("/user", async (req, res) => {
   const data = req.body;
   
   try {
-    const updatedUser = await User.findByIdAndUpdate(userId, data,{returnDocument:'before'});
+    const updatedUser = await User.findByIdAndUpdate(userId, data,{returnDocument:'before',runValidators:true});
     if (!updatedUser) {
       res.status(404).send("User not found");
     } else {
