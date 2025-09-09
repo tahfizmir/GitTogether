@@ -42,11 +42,26 @@ app.get("/feed", async (req, res) => {
 app.post("/signup", async (req, res) => {
   const userData = req.body;
 
+  if (
+    !userData.emailId ||
+    !userData.password ||
+    !userData.gender ||
+    !userData.age
+  ) {
+    return res.status(400).json({ error: "please fill all required fields" });
+  }
+
+  if(req.body?.skills?.length>5){
+    return res.status(400).json({ error: "maximum 5 skills are allowed" });
+  }
+
   try {
     const newuser = new User(userData);
     await newuser.save();
     res.send("new user saved successfully");
-  } catch (err) {}
+  } catch (err) {
+    res.send("error :"+ err);
+  }
 });
 
 app.delete("/user", async (req, res) => {
@@ -63,12 +78,22 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
-  
+
   try {
-    const updatedUser = await User.findByIdAndUpdate(userId, data,{returnDocument:'before',runValidators:true});
+    const ALLOWED_UPDATES = ["photoUrl", "skills", "about"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("update not allowed for this combination of fields");
+    }
+    const updatedUser = await User.findByIdAndUpdate(userId, data, {
+      returnDocument: "before",
+      runValidators: true,
+    });
     if (!updatedUser) {
       res.status(404).send("User not found");
     } else {
@@ -76,7 +101,6 @@ app.patch("/user", async (req, res) => {
     }
   } catch (err) {
     res.status(400).json({ error: err.message });
-
   }
 });
 
