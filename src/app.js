@@ -102,7 +102,7 @@ app.post("/login", async (req, res) => {
 
     const user=await User.findOne({emailId:emailId});
     if(!user){
-      throw new Error("No valid user for this email id")
+      throw new Error("Invalid email or password")
     }
 
     const isPasswordValid = await bcrypt.compare(password,user.password);
@@ -110,7 +110,7 @@ app.post("/login", async (req, res) => {
     if(isPasswordValid){
       res.send("Login Successful")
     }else{
-      res.send("wrong password! try again")
+      res.send("Invalid email or password")
     }
 
    
