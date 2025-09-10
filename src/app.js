@@ -2,6 +2,7 @@ const express = require("express");
 const connectDB = require("./config/database.js");
 const User = require("./models/user.js");
 const validateSignUpData = require("./utils/validations.js");
+const validator=require("validator");
 const bcrypt = require("bcrypt");
 
 const app = express();
@@ -113,7 +114,9 @@ app.post("/login", async (req, res) => {
     }
 
    
-  } catch (err) {}
+  } catch (err) {
+    res.send("ERROR : "+err);
+  }
 });
 
 app.patch("/user/:userId", async (req, res) => {
