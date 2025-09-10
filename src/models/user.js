@@ -7,10 +7,12 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      maxLength: 50
     },
     lastName: {
       type: String,
       trim: true,
+      maxLength: 50
     },
     emailId: {
       type: String,
@@ -60,6 +62,7 @@ const userSchema = new Schema(
       type: String,
       default: "I will update my bio soon.",
       trim: true,
+      maxLength: 500
     },
     skills: {
       type: [String],

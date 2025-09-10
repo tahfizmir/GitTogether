@@ -1,7 +1,8 @@
 const express = require("express");
-const { authAdmin, authUser } = require("./middleware/auth");
 const connectDB = require("./config/database.js");
 const User = require("./models/user.js");
+const validateSignUpData = require("./utils/validations.js");
+const bcrypt = require("bcrypt");
 
 const app = express();
 app.use(express.json()); // converts req to js object
@@ -39,28 +40,39 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+// signup api
 app.post("/signup", async (req, res) => {
-  const userData = req.body;
+  const { firstName, lastName, emailId, password, about, skills, gender, age } =
+    req.body;
 
-  if (
-    !userData.emailId ||
-    !userData.password ||
-    !userData.gender ||
-    !userData.age
-  ) {
+  if (!emailId || !password || !gender || !age) {
     return res.status(400).json({ error: "please fill all required fields" });
   }
 
-  if(req.body?.skills?.length>5){
+  if (req.body?.skills?.length > 5) {
     return res.status(400).json({ error: "maximum 5 skills are allowed" });
   }
 
   try {
-    const newuser = new User(userData);
+    // validating the user
+    validateSignUpData(req);
+    // encrypting the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newuser = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: hashedPassword,
+      age,
+      gender,
+      about,
+      skills,
+    });
     await newuser.save();
     res.send("new user saved successfully");
   } catch (err) {
-    res.send("error :"+ err);
+    res.send("ERROR :" + err.message);
   }
 });
 
@@ -76,6 +88,32 @@ app.delete("/user", async (req, res) => {
   } catch (err) {
     res.send("error in deleting user ", err);
   }
+});
+
+// login api
+app.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
+
+  try {
+    if(!validator.isEmail(emailId)){
+      throw new Error("Not a valid email");
+    }
+
+    const user=await User.findOne({emailId:emailId});
+    if(!user){
+      throw new Error("No valid user for this email id")
+    }
+
+    const isPasswordValid = await bcrypt.compare(password,user.password);
+    
+    if(isPasswordValid){
+      res.send("Login Successful")
+    }else{
+      res.send("wrong password! try again")
+    }
+
+   
+  } catch (err) {}
 });
 
 app.patch("/user/:userId", async (req, res) => {
