@@ -2,11 +2,18 @@ const express = require("express");
 const connectDB = require("./config/database.js");
 const User = require("./models/user.js");
 const validateSignUpData = require("./utils/validations.js");
-const validator=require("validator");
+const validator = require("validator");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+const { authUser } = require("./middleware/auth.js");
+dotenv.config();
 
 const app = express();
-app.use(express.json()); // converts req to js object
+
+app.use(express.json()); // converts all req to js object.
+app.use(cookieParser()); // for reading the cookies.
 
 // fetch particular user with email
 app.get("/user", async (req, res) => {
@@ -96,26 +103,56 @@ app.post("/login", async (req, res) => {
   const { emailId, password } = req.body;
 
   try {
-    if(!validator.isEmail(emailId)){
+    if (!validator.isEmail(emailId)) {
       throw new Error("Not a valid email");
     }
 
-    const user=await User.findOne({emailId:emailId});
-    if(!user){
-      throw new Error("Invalid email or password")
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid email or password");
     }
 
-    const isPasswordValid = await bcrypt.compare(password,user.password);
-    
-    if(isPasswordValid){
-      res.send("Login Successful")
-    }else{
-      res.send("Invalid email or password")
-    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-   
+    if (isPasswordValid) {
+      const secretKeyJWT = process.env.SECRET_KEY_JWT;
+      // create jwt token
+      const token = await jwt.sign({ _id: user._id }, secretKeyJWT);
+
+      // send the cookie with the request
+
+      res.cookie("token", token);
+
+      res.send("Login Successful");
+    } else {
+      res.send("Invalid email or password");
+    }
   } catch (err) {
-    res.send("ERROR : "+err);
+    res.send("ERROR : " + err);
+  }
+});
+
+// get my profile
+app.get("/profile", async (req, res) => {
+  const { emailId } = req.body;
+
+  try {
+    if (!emailId) {
+      throw new Error("Please enter email");
+    }
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Please enter a valid email");
+    }
+    const isTokenValid = authUser(req);
+
+    if (isTokenValid) {
+      res.send(user);
+    } else {
+      res.send("user not authorised");
+    }
+  } catch (err) {
+    res.send(err);
   }
 });
 
