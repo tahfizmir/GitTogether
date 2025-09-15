@@ -119,7 +119,7 @@ app.post("/login", async (req, res) => {
       // create jwt token
       const token = await jwt.sign({ _id: user._id }, secretKeyJWT);
 
-      // send the cookie with the request
+      // send the cookie with the response
 
       res.cookie("token", token);
 
@@ -134,25 +134,23 @@ app.post("/login", async (req, res) => {
 
 // get my profile
 app.get("/profile", async (req, res) => {
-  const { emailId } = req.body;
-
   try {
-    if (!emailId) {
-      throw new Error("Please enter email");
-    }
-    const user = await User.findOne({ emailId: emailId });
+    const decodedPayload = authUser(req);
+
+    const user = await User.findOne({ _id: decodedPayload._id });
+
     if (!user) {
       throw new Error("Please enter a valid email");
     }
-    const isTokenValid = authUser(req);
 
-    if (isTokenValid) {
+    console.log("decoded msg", decodedPayload);
+    if (decodedPayload) {
       res.send(user);
     } else {
       res.send("user not authorised");
     }
   } catch (err) {
-    res.send(err);
+    res.status(400).json({ message: err.message });
   }
 });
 
