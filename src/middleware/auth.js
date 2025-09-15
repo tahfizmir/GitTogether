@@ -1,31 +1,30 @@
 const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
+const User=require("../models/user");
 dotenv.config();
 
-const authAdmin = (req, res, next) => {
-  const token = "xyz";
-  const isAuthenticated = token === "xyz";
-  if (!isAuthenticated) {
-    res.status(401).send("unauthorised admin");
-  } else {
-    next();
-  }
-};
-const jwt = require("jsonwebtoken");
-
-const authUser = (req) => {
-  const { token } = req.cookies;
-  const secretKeyJWT = process.env.SECRET_KEY_JWT;
-
-  if (!token) return null;
-
+const authUser = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, secretKeyJWT);
-    return decoded;
+    const { token } = req.cookies;
+    if (!token) {
+      throw new Error("Token not valid.");
+    }
+    const secretKeyJWT = process.env.SECRET_KEY_JWT;
+
+    const decodedObj = jwt.verify(token, secretKeyJWT);
+    const { _id } = decodedObj;
+    const user= await User.findOne({_id});
+    if(!user){
+      throw new Error("Could not fetch user");
+    }
+    req.user=user;
+    next();
   } catch (err) {
-    return null;
+    res.status(400).send(err);
   }
 };
 
-// this is a temporary auth function that will be later modified to call next()
+// this middleware can be used at any place where
+// we want to first validate if the user is logged in.
 
-module.exports = { authAdmin, authUser };
+module.exports = { authUser };

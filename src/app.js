@@ -15,38 +15,6 @@ const app = express();
 app.use(express.json()); // converts all req to js object.
 app.use(cookieParser()); // for reading the cookies.
 
-// fetch particular user with email
-app.get("/user", async (req, res) => {
-  try {
-    const userEmail = req.body.emailId;
-    const users = await User.find({ emailId: userEmail });
-    if (users.length === 0) {
-      res.status(404).send("user not found");
-    } else {
-      res.send(users);
-    }
-  } catch (err) {
-    res
-      .status(400)
-      .send("something went wrong in fetching user with error: ", err);
-  }
-});
-
-// get all the users for feed
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    if (users.length === 0) {
-      res.status(404).send("no users");
-    } else {
-      res.send(users);
-    }
-  } catch (err) {
-    res
-      .status(400)
-      .send("something went wrong in fetching users with error: ", err);
-  }
-});
 
 // signup api
 app.post("/signup", async (req, res) => {
@@ -81,20 +49,6 @@ app.post("/signup", async (req, res) => {
     res.send("new user saved successfully");
   } catch (err) {
     res.send("ERROR :" + err.message);
-  }
-});
-
-app.delete("/user", async (req, res) => {
-  const userID = req.body._id;
-  try {
-    const deletedUser = await User.findByIdAndDelete(userID);
-    if (deletedUser) {
-      res.send("User deleted successfully");
-    } else {
-      res.status(404).send("User id not found");
-    }
-  } catch (err) {
-    res.send("error in deleting user ", err);
   }
 });
 
@@ -133,52 +87,16 @@ app.post("/login", async (req, res) => {
 });
 
 // get my profile
-app.get("/profile", async (req, res) => {
+app.get("/profile", authUser, async (req, res) => {
   try {
-    const decodedPayload = authUser(req);
-
-    const user = await User.findOne({ _id: decodedPayload._id });
-
-    if (!user) {
-      throw new Error("Please enter a valid email");
-    }
-
-    console.log("decoded msg", decodedPayload);
-    if (decodedPayload) {
-      res.send(user);
-    } else {
-      res.send("user not authorised");
-    }
+    const user = req.user;
+    res.send(user);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId;
-  const data = req.body;
 
-  try {
-    const ALLOWED_UPDATES = ["photoUrl", "skills", "about"];
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    if (!isUpdateAllowed) {
-      throw new Error("update not allowed for this combination of fields");
-    }
-    const updatedUser = await User.findByIdAndUpdate(userId, data, {
-      returnDocument: "before",
-      runValidators: true,
-    });
-    if (!updatedUser) {
-      res.status(404).send("User not found");
-    } else {
-      res.send("user updated successfully");
-    }
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
 
 connectDB()
   .then(() => {
