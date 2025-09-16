@@ -1,9 +1,10 @@
 const express = require("express");
-const validateSignUpData = require("../utils/validations");
+const {validateSignUpData} = require("../utils/validations");
 const validator = require("validator");
 const User = require("../models/user.js");
 const bcrypt = require("bcrypt");
-const authRouter= express.Router();
+const authUser = require("../middleware/auth.js");
+const authRouter = express.Router();
 authRouter.post("/signup", async (req, res) => {
   const { firstName, lastName, emailId, password, about, skills, gender, age } =
     req.body;
@@ -39,9 +40,8 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
-
 authRouter.post("/login", async (req, res) => {
-  const { emailId,password } = req.body;
+  const { emailId, password } = req.body;
 
   try {
     if (!validator.isEmail(emailId)) {
@@ -57,8 +57,8 @@ authRouter.post("/login", async (req, res) => {
 
     if (isPasswordValid) {
       const token = await user.getJWT();
-      res.cookie("token", token,{
-        expires: new Date(Date.now()+8*3600000) // this is cookie expiry. 8hrs
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000), // this is cookie expiry. 8hrs
       });
 
       res.send("Login Successful");
@@ -70,6 +70,11 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
+authRouter.post("/logout", async (req, res) => {
+  res.cookie("token", null, {
+      expires: new Date(Date.now()),
+    })
+    .send("Logged out successfully");
+});
 
-
-module.exports=authRouter;
+module.exports = authRouter;
