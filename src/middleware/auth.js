@@ -27,4 +27,4 @@ const authUser = async (req, res, next) => {
 // this middleware can be used at any place where
 // we want to first validate if the user is logged in.
 
-module.exports = { authUser };
+module.exports = authUser;
