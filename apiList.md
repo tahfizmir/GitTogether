@@ -1,13 +1,13 @@
 the apis we need for now.
 
 authRouter
-POST /signup
-POST /login
-POST /logout
+POST /signup                //done
+POST /login                 //done
+POST /logout                //done
 
 profileRouter
-GET /profile/view
-PATCH /profile/edit
+GET /profile/view           //done
+PATCH /profile/edit         //done
 PATCH /profile/password
 
 connectionRequestRouter
