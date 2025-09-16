@@ -15,7 +15,6 @@ const app = express();
 app.use(express.json()); // converts all req to js object.
 app.use(cookieParser()); // for reading the cookies.
 
-
 // signup api
 app.post("/signup", async (req, res) => {
   const { firstName, lastName, emailId, password, about, skills, gender, age } =
@@ -54,7 +53,7 @@ app.post("/signup", async (req, res) => {
 
 // login api
 app.post("/login", async (req, res) => {
-  const { emailId, password } = req.body;
+  const { emailId,password } = req.body;
 
   try {
     if (!validator.isEmail(emailId)) {
@@ -66,16 +65,13 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid email or password");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validatePassword(password);
 
     if (isPasswordValid) {
-      const secretKeyJWT = process.env.SECRET_KEY_JWT;
-      // create jwt token
-      const token = await jwt.sign({ _id: user._id }, secretKeyJWT,{expiresIn:'7d'});
-
-      // send the cookie with the response
-
-      res.cookie("token", token);
+      const token = await user.getJWT();
+      res.cookie("token", token,{
+        expires: new Date(Date.now()+8*3600000) // this is cookie expiry. 8hrs
+      });
 
       res.send("Login Successful");
     } else {
@@ -95,8 +91,6 @@ app.get("/profile", authUser, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
-
 
 connectDB()
   .then(() => {

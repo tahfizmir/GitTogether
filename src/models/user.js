@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+dotenv.config();
+
 const { Schema, model } = mongoose;
 const userSchema = new Schema(
   {
@@ -7,12 +12,12 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      maxLength: 50
+      maxLength: 50,
     },
     lastName: {
       type: String,
       trim: true,
-      maxLength: 50
+      maxLength: 50,
     },
     emailId: {
       type: String,
@@ -25,11 +30,11 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
-      validate(value){
-        if(!validator.isStrongPassword(value)){
-          throw new Error("Password too weak")
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Password too weak");
         }
-      }
+      },
     },
     gender: {
       type: String,
@@ -62,7 +67,7 @@ const userSchema = new Schema(
       type: String,
       default: "I will update my bio soon.",
       trim: true,
-      maxLength: 500
+      maxLength: 500,
     },
     skills: {
       type: [String],
@@ -70,5 +75,25 @@ const userSchema = new Schema(
   },
   { timestamps: true }
 );
+// custom schema method
+userSchema.methods.getJWT = function () {
+  // Instances of Models are documents i.e user will be a doc
+  const user = this;
+  const secretKeyJWT = process.env.SECRET_KEY_JWT;
+  const token = jwt.sign({ _id: user._id }, secretKeyJWT, {
+    // this is synchronous step so no await ,go to docs for more.
+    expiresIn: "7d",
+  });
+  return token;
+};
+userSchema.methods.validatePassword = async function (passwordInputedByUser) {
+  const user = this;
+  const passwordHash = user.password;
+  const isPasswordValid = await bcrypt.compare(
+    passwordInputedByUser,
+    passwordHash
+  );
 
+  return isPasswordValid;
+};
 module.exports = model("User", userSchema);
