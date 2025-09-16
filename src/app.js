@@ -71,7 +71,7 @@ app.post("/login", async (req, res) => {
     if (isPasswordValid) {
       const secretKeyJWT = process.env.SECRET_KEY_JWT;
       // create jwt token
-      const token = await jwt.sign({ _id: user._id }, secretKeyJWT);
+      const token = await jwt.sign({ _id: user._id }, secretKeyJWT,{expiresIn:'7d'});
 
       // send the cookie with the response
 
