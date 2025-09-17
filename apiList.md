@@ -8,7 +8,7 @@ POST /logout                //done
 profileRouter
 GET /profile/view           //done
 PATCH /profile/edit         //done
-PATCH /profile/password
+PATCH /profile/password     //done
 
 connectionRequestRouter
 POST /request/send/interested/:userId
