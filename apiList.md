@@ -1,18 +1,18 @@
 the apis we need for now.
 
 authRouter
-POST /signup                //done
-POST /login                 //done
-POST /logout                //done
+POST /signup                      //done
+POST /login                       //done
+POST /logout                      //done
 
 profileRouter
-GET /profile/view           //done
-PATCH /profile/edit         //done
-PATCH /profile/password     //done
+GET /profile/view                 //done
+PATCH /profile/edit               //done
+PATCH /profile/changepassword     //done
 
 connectionRequestRouter
-POST /request/send/interested/:userId
-POST /request/send/ignored/:userId
+POST /request/send/:status/:userId  //done
+
 POST /request/review/accepted/:requestId
 POST /request/review/rejected/:requestId
 

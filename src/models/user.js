@@ -40,15 +40,19 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      validate(value) {
-        if (
-          !["male", "female", "others", "third", "bisexual", "fluid"].includes(
-            value
-          )
-        ) {
-          throw new Error("gender data is not valid");
-        }
+      enum: {
+        values: ["male", "female", "others", "third", "bisexual", "fluid"], // makes sure only these 4 values are set for status.
+        message: (props) => `${props.value} is not a valid gender type`,
       },
+      // validate(value) {
+      //   if (
+      //     !["male", "female", "others", "third", "bisexual", "fluid"].includes(
+      //       value
+      //     )
+      //   ) {
+      //     throw new Error("gender data is not valid");
+      //   }
+      // },
     },
     age: {
       type: Number,
