@@ -11,10 +11,8 @@ PATCH /profile/edit               //done
 PATCH /profile/changepassword     //done
 
 connectionRequestRouter
-POST /request/send/:status/:userId  //done
-
-POST /request/review/accepted/:requestId
-POST /request/review/rejected/:requestId
+POST /request/send/:status/:toUserId        //done
+POST /request/review/:status/:toUserId      //done
 
 userRouter
 GET /user/connections
