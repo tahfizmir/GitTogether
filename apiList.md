@@ -15,8 +15,8 @@ POST /request/send/:status/:toUserId        //done
 POST /request/review/:status/:toUserId      //done
 
 userRouter
-GET /user/connections
-GET /user/requests/recieved
+GET /user/connections   // done 
+GET /user/requests      // done
 GET /user/feed                                gets profile of other users
 
 Status: ignore,interested ,  accepted,rejected

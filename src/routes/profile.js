@@ -35,7 +35,6 @@ profileRouter.patch("/profile/edit", authUser, async (req, res) => {
     });
   }
 });
-
 profileRouter.patch("/profile/changepassword", authUser, async (req, res) => {
   const user = req.user;
   // we are considering that the user will first enter his current password then we
