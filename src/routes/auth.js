@@ -3,7 +3,6 @@ const {validateSignUpData} = require("../utils/validations");
 const validator = require("validator");
 const User = require("../models/user.js");
 const bcrypt = require("bcrypt");
-const authUser = require("../middleware/auth.js");
 const authRouter = express.Router();
 authRouter.post("/signup", async (req, res) => {
   const { firstName, lastName, emailId, password, about, skills, gender, age } =
