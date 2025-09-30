@@ -61,7 +61,7 @@ const userSchema = new Schema(
     },
     photoUrl: {
       type: String,
-      default: "https://i.sstatic.net/l60Hf.png",
+      default: "https://www.w3schools.com/howto/img_avatar.png",
       validate: {
         validator: (v) => validator.isURL(v),
         message: "Not a valid URL",
