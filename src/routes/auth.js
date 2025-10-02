@@ -62,10 +62,10 @@ authRouter.post("/login", async (req, res) => {
 
       res.send(user);
     } else {
-      res.send("Invalid email or password");
+      res.status(401).send("Invalid email or password");
     }
   } catch (err) {
-    res.send("ERROR : " + err);
+     res.status(401).send(err.message);
   }
 });
 
