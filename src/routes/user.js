@@ -22,10 +22,7 @@ userRouter.get("/user/requests/recieved", authUser, async (req, res) => {
       status: "interested",
     }).populate("fromUserId", userDataArray); // basically fromUserId matches with _id in the User collection.,
     // if we dont pass this array then all fields will be returned.
-    res.json({
-      message: "Requests fetched successfully",
-      data: connectionRequest,
-    });
+    res.json(connectionRequest);
   } catch (err) {
     res.send(err.message);
   }
