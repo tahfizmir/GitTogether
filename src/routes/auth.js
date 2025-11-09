@@ -1,5 +1,5 @@
 const express = require("express");
-const {validateSignUpData} = require("../utils/validations");
+const { validateSignUpData } = require("../utils/validations");
 const validator = require("validator");
 const User = require("../models/user.js");
 const bcrypt = require("bcrypt");
@@ -8,7 +8,7 @@ authRouter.post("/signup", async (req, res) => {
   const { firstName, lastName, emailId, password, about, skills, gender, age } =
     req.body;
 
-  if (!emailId || !password || !gender || !age) {
+  if (!emailId || !password || !gender || !age || !firstName || !lastName) {
     return res.status(400).json({ error: "please fill all required fields" });
   }
 
@@ -17,8 +17,13 @@ authRouter.post("/signup", async (req, res) => {
   }
 
   try {
+    const existingUser = await User.findOne({ emailId: emailId });
+    console.log("existingUser",existingUser);
+    if (existingUser) {
+      throw Error("Email Id already in use.");
+    }
     // validating the user
-    validateSignUpData(req);
+    validateSignUpData(req); 
     // encrypting the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -35,7 +40,7 @@ authRouter.post("/signup", async (req, res) => {
     await newuser.save();
     res.send("new user saved successfully");
   } catch (err) {
-    res.send("ERROR :" + err.message);
+    res.status(400).send("ERROR :" + err.message);
   }
 });
 
@@ -65,12 +70,13 @@ authRouter.post("/login", async (req, res) => {
       res.status(401).send("Invalid email or password");
     }
   } catch (err) {
-     res.status(401).send(err.message);
+    res.status(401).send(err.message);
   }
 });
 
 authRouter.post("/logout", async (req, res) => {
-  res.cookie("token", null, {
+  res
+    .cookie("token", null, {
       expires: new Date(Date.now()),
     })
     .send("Logged out successfully");
