@@ -4,6 +4,8 @@ const userAuth = require("../middleware/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
+const sendEmail = require("../utils/sendEmail");
+
 // api to send requests
 requestRouter.post(
   "/request/send/:status/:toUserId",
@@ -52,7 +54,15 @@ requestRouter.post(
         toUserId,
         status,
       });
+
       const data = await connectionRequest.save(); // save connection request in database.
+
+      const emailRes = await sendEmail.run({
+        subject: "New Connection Request",
+        text: `${req.user.firstName} sent a ${status} connection request to ${toUser.firstName}`,
+        html: `<h3>${req.user.firstName} sent a ${status} connection request to ${toUser.firstName}</h3>`,
+      });
+      console.log("email response", emailRes);
       res.json({
         message:
           req.user.firstName +
@@ -79,11 +89,9 @@ requestRouter.post(
 
       const allowedStatus = ["accepted", "rejected"];
       if (!allowedStatus.includes(status)) {
-        return res
-          .status(400)
-          .json({
-            message: "Status sent should either be accepted or rejected",
-          });
+        return res.status(400).json({
+          message: "Status sent should either be accepted or rejected",
+        });
       }
 
       const connectionRequest = await ConnectionRequest.findOne({
@@ -99,7 +107,17 @@ requestRouter.post(
       }
       connectionRequest.status = status;
       const data = await connectionRequest.save();
-      res.status(200).json({mesasge:"connection request "+ status+" successfully.", data});
+
+      const emailRes = await sendEmail.run({
+        subject: "Response to your connection Request",
+        text: `${toUser.firstName} responded with a ${status} to your connection request`,
+        html: `<h3>${toUser.firstName} responded with a ${status} to your connection request</h3>`,
+      });
+      console.log("email response", emailRes);
+      res.status(200).json({
+        mesasge: "connection request " + status + " successfully.",
+        data,
+      });
     } catch (err) {
       return res.status(400).send(err.mesasge);
     }
